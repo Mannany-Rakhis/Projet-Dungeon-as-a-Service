@@ -37,6 +37,7 @@ def request_api(
 ) -> Any:
     headers = kwargs.pop("headers", {})
     if authenticated:
+        # Le jeton est chargé seulement pour les requêtes qui en ont besoin.
         token = read_token()
         headers["Authorization"] = f"Bearer {token}"
 

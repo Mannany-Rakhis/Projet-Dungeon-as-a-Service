@@ -16,6 +16,7 @@ from app.services.auth_service import (
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
+# L'URL doit correspondre à la route OAuth2 de connexion pour Swagger.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 Result = TypeVar("Result")
 
@@ -48,6 +49,7 @@ def get_current_player(
 
 
 def _http_error(error: AuthServiceError) -> HTTPException:
+    # Les réponses 401 indiquent au client que l'authentification attendue est Bearer.
     headers = (
         {"WWW-Authenticate": "Bearer"}
         if error.status_code == status.HTTP_401_UNAUTHORIZED

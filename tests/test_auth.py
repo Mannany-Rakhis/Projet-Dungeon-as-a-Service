@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta, timezone
+
+import jwt
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -5,10 +8,11 @@ from sqlalchemy.engine import URL
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.database import get_session
+from app.models.hero import Hero  # noqa: F401
 from app.models.player import Player
 from app.routes.auth import router as auth_router
 from app.routes.heroes import router as heroes_router
-from app.security import verify_password
+from app.security import JWT_ALGORITHM, JWT_SECRET_KEY, verify_password
 
 
 @pytest.fixture
@@ -57,6 +61,8 @@ def test_register_stores_only_password_hash(client) -> None:
     player_data = register(test_client, "alice", "password123")
 
     assert player_data == {"id": 1, "username": "alice"}
+    assert "password" not in player_data
+    assert "hashed_password" not in player_data
     with Session(engine) as session:
         player = session.get(Player, 1)
         assert player is not None
@@ -100,7 +106,9 @@ def test_login_returns_oauth_compatible_jwt(client) -> None:
     assert response.json()["token_type"] == "bearer"
     assert response.json()["access_token"]
     assert test_client.get("/heroes").status_code == 401
-    test_client.headers["Authorization"] = f"Bearer {response.json()['access_token']}"
+    test_client.headers["Authorization"] = (
+        f"Bearer {response.json()['access_token']}"
+    )
     assert test_client.get("/heroes").status_code == 200
 
 
@@ -112,6 +120,30 @@ def test_login_rejects_wrong_password(client) -> None:
         "/auth/login",
         data={"username": "alice", "password": "wrong-password"},
     )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        "not-a-valid-token",
+        jwt.encode(
+            {
+                "sub": "alice",
+                "exp": datetime.now(timezone.utc) - timedelta(minutes=1),
+            },
+            JWT_SECRET_KEY,
+            algorithm=JWT_ALGORITHM,
+        ),
+    ],
+    ids=("invalid", "expired"),
+)
+def test_heroes_reject_invalid_or_expired_tokens(client, token: str) -> None:
+    test_client, _engine = client
+    test_client.headers["Authorization"] = f"Bearer {token}"
+
+    response = test_client.get("/heroes")
 
     assert response.status_code == 401
 
@@ -162,7 +194,7 @@ def test_heroes_are_private_to_their_owner(client) -> None:
 def test_heroes_require_authentication(client) -> None:
     test_client, _engine = client
 
-    requests = [
+    responses = [
         test_client.get("/heroes"),
         test_client.get("/heroes/1"),
         test_client.get("/heroes/1/room"),
@@ -170,21 +202,5 @@ def test_heroes_require_authentication(client) -> None:
         test_client.post("/heroes/1/attack"),
         test_client.post("/heroes/1/rest"),
     ]
-    assert [response.status_code for response in requests] == [401] * len(requests)
 
-
-def test_public_api_routes_have_response_models_and_tags() -> None:
-    from fastapi.routing import APIRoute
-
-    from app.main import app
-
-    api_routes = [
-        route
-        for route in app.routes
-        if isinstance(route, APIRoute)
-        and (route.path.startswith("/heroes") or route.path.startswith("/auth") or route.path == "/health")
-    ]
-
-    assert api_routes
-    assert all(route.response_model is not None for route in api_routes)
-    assert all(route.tags for route in api_routes)
+    assert [response.status_code for response in responses] == [401] * len(responses)

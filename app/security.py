@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from pwdlib import PasswordHash
 
+# La variable d'environnement permet d'utiliser une clé propre à chaque environnement.
 JWT_SECRET_KEY = os.getenv(
     "JWT_SECRET_KEY",
     "development-only-change-this-secret-before-deployment",
@@ -11,6 +12,7 @@ JWT_SECRET_KEY = os.getenv(
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# pwdlib choisit un algorithme de hachage adapté et génère un sel par mot de passe.
 password_hash = PasswordHash.recommended()
 
 
@@ -23,6 +25,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(username: str) -> str:
+    # Les dates UTC et l'expiration limitent la durée de validité du jeton.
     expires_at = datetime.now(timezone.utc) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -34,6 +37,7 @@ def create_access_token(username: str) -> str:
 
 
 def decode_access_token(token: str) -> str | None:
+    # PyJWT vérifie la signature et l'expiration avant de lire l'identifiant du joueur.
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     except jwt.InvalidTokenError:

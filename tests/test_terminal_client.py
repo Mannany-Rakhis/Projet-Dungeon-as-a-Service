@@ -26,13 +26,7 @@ def test_terminal_client_runs_game_commands_and_saves_bearer_token(
     monkeypatch.setattr(play.requests, "request", fake_request)
 
     commands = [
-        [
-            "register",
-            "--username",
-            "alice",
-            "--password",
-            "password123",
-        ],
+        ["register", "--username", "alice", "--password", "password123"],
         ["login", "--username", "alice", "--password", "password123"],
         [
             "create",
@@ -90,3 +84,27 @@ def test_authenticated_terminal_command_requires_saved_token(
 
     assert result == 1
     assert "commande login" in capsys.readouterr().err
+
+
+def test_terminal_client_reports_api_errors(
+    monkeypatch,
+    tmp_path,
+    capsys,
+) -> None:
+    monkeypatch.setattr(play, "TOKEN_PATH", tmp_path / ".token")
+    (tmp_path / ".token").write_text("jwt-test-token", encoding="utf-8")
+    monkeypatch.setattr(
+        play.requests,
+        "request",
+        lambda *args, **kwargs: SimpleNamespace(
+            ok=False,
+            json=lambda: {"detail": {"error": "INVALID_TOKEN"}},
+            text="",
+            status_code=401,
+        ),
+    )
+
+    result = play.main(["look", "--hero", "1"])
+
+    assert result == 1
+    assert "Erreur HTTP 401" in capsys.readouterr().err
