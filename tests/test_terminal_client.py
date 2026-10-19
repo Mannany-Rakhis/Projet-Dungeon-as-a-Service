@@ -11,7 +11,7 @@ def test_terminal_client_runs_game_commands_and_saves_bearer_token(
     calls: list[dict] = []
     monkeypatch.setattr(play, "TOKEN_PATH", token_path)
 
-    def fake_request(method, url, **kwargs):
+    def fake_request(method, url, **kwargs): 
         calls.append({"method": method, "url": url, **kwargs})
         if url.endswith("/auth/login"):
             payload = {"access_token": "jwt-test-token", "token_type": "bearer"}
