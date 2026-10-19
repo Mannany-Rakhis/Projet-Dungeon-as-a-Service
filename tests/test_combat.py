@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -178,6 +180,39 @@ def test_thief_critical_attack_kills_goblin_without_riposte(
         "or_gagne": 10,
         "victoire": False,
     }
+
+
+def test_each_move_and_combat_turn_is_logged(
+    client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.INFO, logger="app.services.hero_service"):
+        hero_id = create_hero(client)
+        caplog.clear()
+
+        for direction in ("nord", "ouest"):
+            response = client.post(
+                f"/heroes/{hero_id}/move",
+                json={"direction": direction},
+            )
+            assert response.status_code == 200
+
+        attack_response = client.post(f"/heroes/{hero_id}/attack")
+        assert attack_response.status_code == 200
+
+    messages = [
+        record.getMessage()
+        for record in caplog.records
+        if record.name == "app.services.hero_service"
+    ]
+    move_messages = [message for message in messages if message.startswith("Déplacement")]
+    combat_messages = [message for message in messages if message.startswith("Attaque")]
+
+    assert len(move_messages) == 2
+    assert "salle=entree destination=hall" in move_messages[0]
+    assert "salle=hall destination=bibliotheque" in move_messages[1]
+    assert len(combat_messages) == 1
+    assert "monstre=gobelin" in combat_messages[0]
 
 
 def test_mage_attack_uses_intelligence_damage(client: TestClient) -> None:
