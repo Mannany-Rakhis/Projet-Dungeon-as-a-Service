@@ -414,6 +414,31 @@
         }
       }
     },
+    "/leaderboard": {
+      "get": {
+        "tags": [
+          "Classement"
+        ],
+        "summary": "Read Leaderboard",
+        "operationId": "read_leaderboard_leaderboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LeaderboardRead"
+                  },
+                  "type": "array",
+                  "title": "Response Read Leaderboard Leaderboard Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -719,6 +744,39 @@
           "est_vivant"
         ],
         "title": "HeroRead"
+      },
+      "LeaderboardRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nom": {
+            "type": "string",
+            "title": "Nom"
+          },
+          "classe": {
+            "type": "string",
+            "title": "Classe"
+          },
+          "victoire": {
+            "type": "boolean",
+            "title": "Victoire"
+          },
+          "or_": {
+            "type": "integer",
+            "title": "Or"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nom",
+          "classe",
+          "victoire",
+          "or_"
+        ],
+        "title": "LeaderboardRead"
       },
       "MonsterRead": {
         "properties": {

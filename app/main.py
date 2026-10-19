@@ -15,6 +15,7 @@ from app.models.hero import Hero  # noqa: F401
 from app.models.player import Player  # noqa: F401
 from app.routes.auth import router as auth_router
 from app.routes.heroes import router as heroes_router
+from app.routes.leaderboard import router as leaderboard_router
 from app.schemas.system import HealthRead
 
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +37,7 @@ app = FastAPI(
 
 app.include_router(heroes_router)
 app.include_router(auth_router)
+app.include_router(leaderboard_router)
 
 
 @app.get("/health", response_model=HealthRead, tags=["Système"])

@@ -100,6 +100,13 @@ ni `owner_id`.
 tous les PV du héros. Le repos est refusé avec une erreur 409 (`IN_COMBAT`) en
 combat ou (`HERO_DEAD`) si le héros est mort.
 
+## Palier 4 — Classement
+
+`GET /leaderboard` renvoie les dix meilleurs héros, triés d'abord par victoire,
+puis par or récolté et enfin par identifiant. Le classement est consultable sans
+authentification et n'expose que l'identifiant, le nom, la classe, la victoire
+et l'or de chaque héros.
+
 ## Palier 4 — Authentification et propriété des héros
 
 - `POST /auth/register` crée un compte avec `username` et `password`. Les mots de
@@ -189,4 +196,4 @@ opération supprime les comptes et les héros qu'il contenait.
 - **Lien du dépôt Git :** [Dungeon_as_service_API_PYTHON](https://github.com/lovaniainasitraka/Dungeon_as_service_API_PYTHON)
 - **Palier atteint :** Palier 4 — fonctionnalités FT-1 à FT-11, incluant l'authentification et la propriété des héros.
 - **Bonus réalisés :** client de jeu en terminal (`client/play.py`) avec inscription, connexion, création de héros, exploration, combat et repos ; schéma OpenAPI exporté dans `dungeonapi/openapi.json`.
-- **Ce qui ne fonctionne pas / difficultés :** aucune migration automatique n'est fournie pour les anciennes bases SQLite ; la suite de tests passe (45 tests).
+- **Ce qui ne fonctionne pas / difficultés :** aucune migration automatique n'est fournie pour les anciennes bases SQLite ; la suite de tests passe (46 tests).
