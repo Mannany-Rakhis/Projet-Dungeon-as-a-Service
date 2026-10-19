@@ -12,6 +12,7 @@
           "Héros"
         ],
         "summary": "List Heroes",
+        "description": "Liste uniquement les héros du joueur authentifié.",
         "operationId": "list_heroes_heroes_get",
         "responses": {
           "200": {
@@ -40,6 +41,7 @@
           "Héros"
         ],
         "summary": "Create Hero",
+        "description": "Crée un héros pour le joueur authentifié.",
         "operationId": "create_hero_heroes_post",
         "requestBody": {
           "content": {
@@ -86,6 +88,7 @@
           "Héros"
         ],
         "summary": "Get Hero",
+        "description": "Retourne un héros appartenant au joueur authentifié.",
         "operationId": "get_hero_heroes__hero_id__get",
         "security": [
           {
@@ -133,6 +136,7 @@
           "Héros"
         ],
         "summary": "Get Hero Room",
+        "description": "Retourne la salle actuelle d'un héros appartenant au joueur.",
         "operationId": "get_hero_room_heroes__hero_id__room_get",
         "security": [
           {
@@ -180,7 +184,7 @@
           "Héros"
         ],
         "summary": "Move Hero",
-        "description": "Déplace le héros ; les actions refusées par les règles métier renvoient 409.",
+        "description": "Déplace le héros ; un refus lié à son état renvoie 409.",
         "operationId": "move_hero_heroes__hero_id__move_post",
         "security": [
           {
