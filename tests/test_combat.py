@@ -147,6 +147,37 @@ def test_warrior_attack_and_monster_riposte(client: TestClient) -> None:
         "or_gagne": 0,
         "victoire": False,
     }
+    hero_response = client.get(f"/heroes/{hero_id}")
+    room_response = client.get(f"/heroes/{hero_id}/room")
+    assert hero_response.json()["pv"] == 27
+    assert room_response.json()["monster"]["hp"] == 16
+
+
+def test_thief_critical_attack_kills_goblin_without_riposte(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    hero_id = create_hero(client, "voleur")
+    client.post(f"/heroes/{hero_id}/move", json={"direction": "nord"})
+    client.post(f"/heroes/{hero_id}/move", json={"direction": "ouest"})
+    monkeypatch.setattr(
+        "app.domain.heroes.random.randint",
+        lambda low, high: low if high == 3 else high,
+    )
+
+    response = client.post(f"/heroes/{hero_id}/attack")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "degats_infliges": 28,
+        "critique": True,
+        "degats_subis": 0,
+        "pv_heros": 24,
+        "pv_monstre": 0,
+        "issue": "monstre_vaincu",
+        "or_gagne": 10,
+        "victoire": False,
+    }
 
 
 def test_mage_attack_uses_intelligence_damage(client: TestClient) -> None:
