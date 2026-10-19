@@ -5,24 +5,25 @@ Lancer le serveur depuis la racine du projet :
 Puis ouvrir http://127.0.0.1:8000/docs
 """
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.database import create_db_and_tables, engine
+from app.database import create_db_and_tables
 from app.models.hero import Hero  # noqa: F401
 from app.models.player import Player  # noqa: F401
 from app.routes.auth import router as auth_router
 from app.routes.heroes import router as heroes_router
 from app.schemas.system import HealthRead
-from app.services.hero_migrations import migrate_hero_schema
+
+logging.basicConfig(level=logging.INFO)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Exécuté une fois au démarrage du serveur : crée les tables si besoin
     create_db_and_tables()
-    migrate_hero_schema(engine)
     yield
 
 

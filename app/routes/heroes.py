@@ -32,6 +32,7 @@ def create_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> Hero:
+    """Crée un héros pour le joueur authentifié."""
     return _call_service(service_create, hero_data, player, session)
 
 
@@ -40,6 +41,7 @@ def list_heroes(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> list[Hero]:
+    """Liste les héros du joueur authentifié."""
     return list(_call_service(service_list, player, session))
 
 
@@ -49,6 +51,7 @@ def get_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> Hero:
+    """Retourne un héros appartenant au joueur authentifié."""
     return _call_service(service_get, hero_id, player, session)
 
 
@@ -58,6 +61,7 @@ def get_hero_room(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> RoomRead:
+    """Retourne la salle actuelle du héros."""
     return _call_service(service_get_room, hero_id, player, session)
 
 
@@ -68,6 +72,7 @@ def move_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> RoomRead:
+    """Déplace le héros ; les actions refusées par les règles métier renvoient 409."""
     return _call_service(service_move, hero_id, move, player, session)
 
 
@@ -77,6 +82,10 @@ def attack_with_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> CombatRead:
+    """Résout un tour : le héros frappe d'abord, le monstre riposte s'il survit.
+
+    Renvoie 409 si le héros est mort ou si aucun combat n'est en cours.
+    """
     return _call_service(service_attack, hero_id, player, session)
 
 
@@ -86,10 +95,15 @@ async def rest_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> Hero:
+    """Repose le héros de façon asynchrone en attendant trois secondes.
+
+    Renvoie 409 si le héros est mort ou s'il est en combat.
+    """
     return await _call_async_service(service_rest, hero_id, player, session)
 
 
 def _http_error(error: HeroServiceError) -> HTTPException:
+    """Convertit une erreur métier en réponse HTTP structurée."""
     return HTTPException(
         status_code=error.status_code,
         detail={"error": error.error, "message": error.message},
@@ -97,6 +111,7 @@ def _http_error(error: HeroServiceError) -> HTTPException:
 
 
 def _call_service(operation: Callable[..., Result], *args: object) -> Result:
+    """Centralise la traduction des erreurs métier pour les routes synchrones."""
     try:
         return operation(*args)
     except HeroServiceError as error:
@@ -107,6 +122,7 @@ async def _call_async_service(
     operation: Callable[..., Awaitable[Result]],
     *args: object,
 ) -> Result:
+    """Même traduction que _call_service, en attendant un service asynchrone."""
     try:
         return await operation(*args)
     except HeroServiceError as error:

@@ -1,7 +1,6 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import inspect
 from sqlalchemy.engine import URL
 from sqlmodel import Session, SQLModel, create_engine, select
 
@@ -10,7 +9,6 @@ from app.models.hero import Hero
 from app.routes.auth import router as auth_router
 from app.routes.heroes import router
 from app.services.dungeon_map import START_ROOM, get_room
-from app.services.hero_migrations import migrate_hero_schema
 
 
 @pytest.fixture
@@ -263,74 +261,6 @@ def test_hero_is_persisted_after_reopening_database(
         reopened_engine.dispose()
 
     assert persisted_hero.nom == "Aragorn"
-
-
-def test_migration_adds_combat_columns_without_losing_heroes(tmp_path) -> None:
-    engine = create_engine(URL.create("sqlite", database=str(tmp_path / "legacy.db")))
-    with engine.begin() as connection:
-        connection.exec_driver_sql(
-            """
-            CREATE TABLE hero (
-                id INTEGER PRIMARY KEY,
-                nom VARCHAR NOT NULL,
-                classe VARCHAR NOT NULL,
-                "force" INTEGER NOT NULL,
-                agilite INTEGER NOT NULL,
-                intelligence INTEGER NOT NULL,
-                pv INTEGER NOT NULL,
-                pv_max INTEGER NOT NULL,
-                salle VARCHAR NOT NULL,
-                gold INTEGER NOT NULL DEFAULT 0
-            )
-            """
-        )
-        connection.exec_driver_sql(
-            """
-            INSERT INTO hero (
-                id, nom, classe, "force", agilite, intelligence, pv, pv_max, salle, gold
-            ) VALUES (1, 'Aragorn', 'guerrier', 6, 2, 2, 20, 20, 'entree', 7)
-            """
-        )
-
-    migrate_hero_schema(engine)
-
-    column_names = {column["name"] for column in inspect(engine).get_columns("hero")}
-    with Session(engine) as session:
-        hero = session.get(Hero, 1)
-        assert hero is not None
-        assert hero.nom == "Aragorn"
-        assert hero.pv == 32
-        assert hero.pv_max == 32
-        assert hero.or_ == 7
-        assert hero.victoire is False
-        assert hero.salle_actuelle == START_ROOM
-        assert hero.owner_id is None
-
-        session.add(
-            Hero(
-                nom="Legolas",
-                classe="voleur",
-                force=2,
-                agilite=6,
-                intelligence=2,
-                pv=24,
-                pv_max=24,
-                salle_actuelle=START_ROOM,
-            )
-        )
-        session.commit()
-        created_hero_id = session.exec(
-            select(Hero.id).where(Hero.nom == "Legolas")
-        ).one()
-    engine.dispose()
-
-    assert "salle_actuelle" in column_names
-    assert "salle" not in column_names
-    assert "monstre_pv" in column_names
-    assert "or_" in column_names
-    assert "victoire" in column_names
-    assert "owner_id" in column_names
-    assert created_hero_id == 2
 
 
 @pytest.mark.parametrize(
