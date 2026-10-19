@@ -29,6 +29,23 @@ fastapi dev app/main.py
 Ouvrez ensuite http://127.0.0.1:8000/docs : la route `GET /health` doit répondre
 `{"status": "ok", ...}`. Si c'est le cas, vous êtes prêts.
 
+## Exporter le schéma OpenAPI
+
+Avec le serveur démarré et depuis la racine du projet, exportez le schéma
+OpenAPI dans le fichier demandé à la racine :
+
+```powershell
+Invoke-WebRequest -Uri http://127.0.0.1:8000/openapi.json -OutFile openapi.json
+```
+
+## Exécuter les tests
+
+Depuis la racine du projet, avec l'environnement virtuel activé :
+
+```powershell
+python -m pytest
+```
+
 ## Palier 1 — Création d'un héros
 
 Dans Swagger (`POST /heroes`), envoyez par exemple :
@@ -120,6 +137,14 @@ et l'or de chaque héros.
   via `JWT_SECRET_KEY` avant tout déploiement ; la valeur intégrée par défaut
   sert uniquement au développement local.
 
+Dans PowerShell, définissez cette variable dans le terminal avant de lancer le
+serveur. Remplacez la valeur d'exemple par une clé secrète aléatoire et ne la
+committez jamais :
+
+```powershell
+$env:JWT_SECRET_KEY = "remplacer-par-une-cle-aleatoire"
+```
+
 La base SQLite doit correspondre aux modèles actuels. Aucune migration
 automatique ne met à niveau une ancienne base ; les anciennes colonnes et
 données ne sont donc pas converties vers le schéma actuel.
@@ -193,7 +218,7 @@ opération supprime les comptes et les héros qu'il contenait.
 ## Notre rendu
 
 - **Membres du groupe :** Lovaniaina Sitraka, Rakhis Mannany et Eddie Chan.
-- **Lien du dépôt Git :** [Dungeon_as_service_API_PYTHON](https://github.com/lovaniainasitraka/Dungeon_as_service_API_PYTHON)
+- **Lien du dépôt Git :** [Dungeon_as_service_API_PYTHON](https://github.com/Mannany-Rakhis/Projet-Dungeon-as-a-Service)
 - **Palier atteint :** Palier 4 — fonctionnalités FT-1 à FT-11, incluant l'authentification et la propriété des héros.
-- **Bonus réalisés :** client de jeu en terminal (`client/play.py`) avec inscription, connexion, création de héros, exploration, combat et repos ; schéma OpenAPI exporté dans `dungeonapi/openapi.json`.
+- **Bonus réalisés :** client de jeu en terminal (`client/play.py`) avec inscription, connexion, création de héros, exploration, combat et repos ; schéma OpenAPI exporté dans `openapi.json`.
 - **Ce qui ne fonctionne pas / difficultés :** aucune migration automatique n'est fournie pour les anciennes bases SQLite ; la suite de tests passe (61 tests).
