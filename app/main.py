@@ -18,9 +18,6 @@ from app.routes.heroes import router as heroes_router
 from app.routes.leaderboard import router as leaderboard_router
 from app.schemas.system import HealthRead
 
-logging.basicConfig(level=logging.INFO)
-
-# Configure une journalisation lisible pour l'API et les services.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -29,7 +26,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Crée les tables et adapte le schéma avant d'accepter les requêtes.
+    # Crée les tables avant d'accepter les requêtes.
     create_db_and_tables()
     yield
 

@@ -831,7 +831,8 @@
           "username",
           "password"
         ],
-        "title": "PlayerCreate"
+        "title": "PlayerCreate",
+        "description": "Données validées nécessaires à la création d'un compte joueur."
       },
       "PlayerRead": {
         "properties": {
@@ -849,7 +850,8 @@
           "id",
           "username"
         ],
-        "title": "PlayerRead"
+        "title": "PlayerRead",
+        "description": "Informations publiques du joueur, sans son mot de passe haché."
       },
       "RoomRead": {
         "properties": {
@@ -909,7 +911,8 @@
         "required": [
           "access_token"
         ],
-        "title": "TokenRead"
+        "title": "TokenRead",
+        "description": "Jeton d'accès au format attendu par l'authentification Bearer."
       },
       "ValidationError": {
         "properties": {
