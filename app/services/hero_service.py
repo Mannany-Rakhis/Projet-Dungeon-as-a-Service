@@ -30,7 +30,6 @@ class HeroServiceError(Exception):
 
 
 def create_hero(hero_data: HeroCreate, player: Player, session: Session) -> Hero:
-    """Crée et sauvegarde un héros dans la salle de départ."""
     hero_domain = creer_heros(
         hero_data.classe,
         hero_data.force,
@@ -57,17 +56,14 @@ def create_hero(hero_data: HeroCreate, player: Player, session: Session) -> Hero
 
 
 def list_heroes(player: Player, session: Session) -> Sequence[Hero]:
-    """Liste les héros appartenant au joueur connecté."""
     return session.exec(select(Hero).where(Hero.owner_id == player.id)).all()
 
 
 def get_hero(hero_id: int, player: Player, session: Session) -> Hero:
-    """Retourne un héros après vérification de son propriétaire."""
     return _get_owned_hero(hero_id, player, session)
 
 
 def get_hero_room(hero_id: int, player: Player, session: Session) -> RoomRead:
-    """Retourne la salle actuelle et les informations de son monstre."""
     hero = _get_owned_hero(hero_id, player, session)
     return _room_read_for_hero(hero)
 
@@ -247,7 +243,6 @@ async def rest_hero(hero_id: int, player: Player, session: Session) -> Hero:
 
 
 def _get_owned_hero(hero_id: int, player: Player, session: Session) -> Hero:
-    """Charge un héros et refuse l'accès s'il appartient à un autre joueur."""
     hero = session.get(Hero, hero_id)
     if hero is None:
         raise HeroServiceError(
@@ -271,7 +266,6 @@ def _ensure_hero_alive(hero: Hero) -> None:
 
 
 def _room_read_for_hero(hero: Hero) -> RoomRead:
-    """Construit la réponse publique de salle à partir de l'état du héros."""
     room = get_dungeon_room(hero.salle_actuelle)
     if room is None:
         raise HeroServiceError(
