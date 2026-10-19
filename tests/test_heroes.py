@@ -98,6 +98,15 @@ def test_list_heroes(client: TestClient) -> None:
     assert response.json()[0]["nom"] == "Aragorn"
 
 
+def test_list_heroes_returns_empty_list_when_player_has_no_heroes(
+    client: TestClient,
+) -> None:
+    response = client.get("/heroes")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
 def test_get_hero_by_id(client: TestClient) -> None:
     created = client.post(
         "/heroes",
