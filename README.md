@@ -72,9 +72,8 @@ un redémarrage du serveur.
 - Entrer dans une salle hantée démarre un combat contre son monstre avec ses PV
   au maximum. L'état du monstre courant est sauvegardé avec le héros.
 
-Les tables manquantes sont créées au démarrage. La structure d'une base SQLite
-existante n'est pas migrée automatiquement ; si elle provient d'une ancienne
-version du projet, consultez la section « Réinitialiser la partie ».
+Au démarrage, les colonnes d'état de combat sont ajoutées automatiquement à une
+base SQLite existante ; les héros déjà enregistrés sont conservés.
 
 ## Palier 3 — Combat et états du héros
 
@@ -113,9 +112,11 @@ combat ou (`HERO_DEAD`) si le héros est mort.
   via `JWT_SECRET_KEY` avant tout déploiement ; la valeur intégrée par défaut
   sert uniquement au développement local.
 
-La base SQLite doit correspondre aux modèles actuels. Aucune migration
-automatique ne met à niveau une ancienne base ; les anciennes colonnes et
-données ne sont donc pas converties vers le schéma actuel.
+Les colonnes `owner_id`, `salle_actuelle`, `monstre_pv`, `or_` et `victoire` sont
+ajoutées automatiquement aux bases SQLite existantes. Les anciennes valeurs
+`gold`, `salle` et `combat_monster_hp` sont migrées vers les champs actuels.
+Les héros déjà présents ne sont pas supprimés ; les anciens héros sans
+propriétaire ne sont pas visibles par les nouveaux comptes.
 
 ## Structure
 
@@ -177,9 +178,8 @@ exemple `python client/play.py --api-url http://127.0.0.1:8000 login ...`.
 
 ## Réinitialiser la partie
 
-Si la base `dungeon.db` provient d'une ancienne version du schéma, arrêtez le
-serveur puis supprimez ce fichier. Il sera recréé au prochain lancement. Cette
-opération supprime les comptes et les héros qu'il contenait.
+Arrêtez le serveur et supprimez le fichier `dungeon.db` : il sera recréé au prochain lancement.
+À faire aussi si vous ajoutez une colonne à une table (SQLite ne met pas à jour une table existante).
 
 ---
 
@@ -188,5 +188,5 @@ opération supprime les comptes et les héros qu'il contenait.
 - **Membres du groupe :** Lovaniaina Sitraka, Rakhis Mannany et Eddie Chan.
 - **Lien du dépôt Git :** [Dungeon_as_service_API_PYTHON](https://github.com/lovaniainasitraka/Dungeon_as_service_API_PYTHON)
 - **Palier atteint :** Palier 4 — fonctionnalités FT-1 à FT-11, incluant l'authentification et la propriété des héros.
-- **Bonus réalisés :** client de jeu en terminal (`client/play.py`) avec inscription, connexion, création de héros, exploration, combat et repos ; schéma OpenAPI exporté dans `dungeonapi/openapi.json`.
-- **Ce qui ne fonctionne pas / difficultés :** aucune migration automatique n'est fournie pour les anciennes bases SQLite ; la suite de tests passe (43 tests).
+- **Bonus réalisés :** client de jeu en terminal (`client/play.py`) avec inscription, connexion, création de héros, exploration, combat et repos ; migration des bases SQLite existantes en conservant les héros enregistrés.
+- **Ce qui ne fonctionne pas / difficultés :** aucun problème connu à la date du rendu. La suite de tests passe (44 tests).
