@@ -32,7 +32,7 @@ def create_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> Hero:
-    """Cr?e un h?ros pour le joueur authentifi?."""
+    """Crée un héros pour le joueur authentifié."""
     return _call_service(service_create, hero_data, player, session)
 
 
@@ -41,7 +41,7 @@ def list_heroes(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> list[Hero]:
-    """Liste les h?ros du joueur authentifi?."""
+    """Liste les héros du joueur authentifié."""
     return list(_call_service(service_list, player, session))
 
 
@@ -51,7 +51,7 @@ def get_hero(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> Hero:
-    """Retourne un h?ros appartenant au joueur authentifi?."""
+    """Retourne un héros appartenant au joueur authentifié."""
     return _call_service(service_get, hero_id, player, session)
 
 
@@ -61,7 +61,7 @@ def get_hero_room(
     player: CurrentPlayer,
     session: Session = Depends(get_session),
 ) -> RoomRead:
-    """Retourne la salle actuelle du h?ros."""
+    """Retourne la salle actuelle du héros."""
     return _call_service(service_get_room, hero_id, player, session)
 
 
